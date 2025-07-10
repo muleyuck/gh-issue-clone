@@ -39,6 +39,34 @@ type ProjectItem struct {
 	} `graphql:"fieldValues(first: 100)"`
 }
 
+type IssueTemplate struct {
+	Name     graphql.String
+	Title    graphql.String
+	Body     graphql.String
+	Assinees struct {
+		Nodes []struct {
+			Id graphql.ID
+		}
+	} `graphql:"assignees(first: 10)"`
+	Labels struct {
+		Nodes []struct {
+			Id graphql.ID
+		}
+	} `graphql:"labels(first: 10)"`
+}
+
+func FindByName(templates []IssueTemplate, name string) *IssueTemplate {
+	m := map[graphql.String]IssueTemplate{}
+	for _, template := range templates {
+		m[template.Name] = template
+	}
+	val, ok := m[graphql.String(name)]
+	if !ok {
+		return nil
+	}
+	return &val
+}
+
 type GetIssueQuery struct {
 	Repository struct {
 		Id    graphql.ID
@@ -73,21 +101,7 @@ type GetIssueQuery struct {
 				}
 			} `graphql:"subIssues(first: 10)"`
 		} `graphql:"issue(number: $issueNumber)"`
-		IssueTemplates []struct {
-			Name     graphql.String
-			Title    graphql.String
-			Body     graphql.String
-			Assinees struct {
-				Nodes []struct {
-					Id graphql.ID
-				}
-			} `graphql:"assignees(first: 10)"`
-			Labels struct {
-				Nodes []struct {
-					Id graphql.ID
-				}
-			} `graphql:"labels(first: 10)"`
-		}
+		IssueTemplates []IssueTemplate
 	} `graphql:"repository(owner: $owner, name: $repo)"`
 }
 

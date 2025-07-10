@@ -26,17 +26,36 @@ func generateIdSlice(targets []struct{ Id graphql.ID }) []graphql.ID {
 	})
 }
 
-func createIssueInput(query GetIssueQuery) map[string]any {
+func createIssueInput(query GetIssueQuery, template *IssueTemplate) map[string]any {
+	var assigneeIds []graphql.ID
+	var body graphql.String
+	var labelIds []graphql.ID
+	var title graphql.String
+	if template != nil {
+		assigneeIds = generateIdSlice(template.Assinees.Nodes)
+		body = template.Body
+		labelIds = generateIdSlice(template.Labels.Nodes)
+		if len(template.Title) > 0 {
+			title = template.Title
+		} else {
+			title = query.Repository.Issue.Title
+		}
+	} else {
+		assigneeIds = generateIdSlice(query.Repository.Issue.Assinees.Nodes)
+		body = query.Repository.Issue.Body
+		labelIds = generateIdSlice(query.Repository.Issue.Labels.Nodes)
+		title = query.Repository.Issue.Title
+	}
 	return map[string]any{
 		"input": CreateIssueInput{
-			AssigneeIds:   generateIdSlice(query.Repository.Issue.Assinees.Nodes),
-			Body:          query.Repository.Issue.Body,
+			AssigneeIds:   assigneeIds,
+			Body:          body,
 			IssueTypeId:   query.Repository.Issue.IssueType.Id,
-			LabelIds:      generateIdSlice(query.Repository.Issue.Labels.Nodes),
+			LabelIds:      labelIds,
 			MilestoneId:   query.Repository.Issue.Milestone.Id,
 			ParentIssueId: query.Repository.Issue.Parent.Id,
 			RepositoryId:  query.Repository.Id,
-			Title:         query.Repository.Issue.Title,
+			Title:         title,
 		},
 	}
 }
