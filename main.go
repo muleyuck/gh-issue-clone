@@ -62,7 +62,7 @@ func main() {
 				return err
 			}
 			if query.Repository.Id == nil {
-				return fmt.Errorf("repository id is null. issue should be belong to any repository.")
+				return fmt.Errorf("repository id is null")
 			}
 
 			template := FindByName(query.Repository.IssueTemplates, templateName)
