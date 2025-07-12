@@ -20,7 +20,7 @@ jobs:
               echo invalid version string. expected format v1.2.3.
               exit 1
           fi
-          sed -i -e "s/.*/$pushed_tag/" ./scripts/app_version
+          sed -i -e "s/.*/$pushed_tag/" ./versions/app_version
           git update-index --skip-worktree ./versions/app_version
       - uses: cli/gh-extension-precompile@v2
         with:
