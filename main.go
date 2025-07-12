@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cli/go-gh/v2/pkg/api"
+	"github.com/muleyuck/gh-issue-clone/versions"
 	"github.com/urfave/cli/v3"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	cmd := &cli.Command{
 		Name:    "issue-clone",
 		Usage:   "clone GitHub issues from a given issue.",
-		Version: "v0.0.1",
+		Version: versions.AppVersion,
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "template", Aliases: []string{"t"}, Usage: "Issue Template Name"},
 		},
