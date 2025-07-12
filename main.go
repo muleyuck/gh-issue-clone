@@ -16,7 +16,7 @@ import (
 func main() {
 	cmd := &cli.Command{
 		Name:    "issue-clone",
-		Usage:   "Gihub Issue Clone Command from URL",
+		Usage:   "clone GitHub issues from a given issue.",
 		Version: "v0.0.1",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "template", Aliases: []string{"t"}, Usage: "Issue Template Name"},
@@ -27,7 +27,7 @@ func main() {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			issueURL := cmd.StringArg("url")
 			if len(issueURL) <= 0 {
-				return fmt.Errorf("usage: gh issue-clone <issue-url>")
+				return fmt.Errorf(" No URL provided. Usage: gh issue-clone <issue-url>")
 			}
 			templateName := cmd.String("template")
 			// Extract owner, repo, and issue number from URL
@@ -35,7 +35,7 @@ func main() {
 			matches := re.FindStringSubmatch(issueURL)
 
 			if matches == nil || len(matches) != 4 {
-				log.Fatal("Invalid GitHub issue URL format. Expected: https://github.com/owner/repo/issues/number")
+				return fmt.Errorf(" Invalid GitHub issue URL format. Expected: https://github.com/owner/repo/issues/number")
 			}
 
 			owner := matches[1]
@@ -62,10 +62,12 @@ func main() {
 				return err
 			}
 			if query.Repository.Id == nil {
-				return fmt.Errorf("repository id is null")
+				return fmt.Errorf(" Repository not found or you don't have access to it")
 			}
 
 			template := FindByName(query.Repository.IssueTemplates, templateName)
+
+			fmt.Println("Creating new issue from fetched issue details...")
 
 			var createMutation CreateIssueMutation
 			err = client.Mutate("CreateIssue", &createMutation, createIssueInput(query, template))
@@ -73,20 +75,18 @@ func main() {
 				return err
 			}
 
-			fmt.Printf("Created issue with ID: %s\n", createMutation.CreateIssue.Issue.Id)
-
 			var addMutation AddProjectV2ItemByIdMutation
 			var updateMutation UpdateProjectV2ItemFieldValueMutation
 
 			projectItems := query.Repository.Issue.ProjectItems.Nodes
 			for _, projectItem := range projectItems {
+				fmt.Printf("Found relevant project: %s. Add the issue to the project.\n", projectItem.Project.Title)
 				err = client.Mutate("AddProjectV2ItemById", &addMutation, addProjectV2ItemByIdInput(projectItem.Project.Id, createMutation.CreateIssue.Issue.Id))
 				if err != nil {
 					// TODO: Remove Issue to Rollback
 					return err
 				}
 
-				fmt.Printf("Add Project as ID: %s\n", addMutation.AddProjectV2ItemById.Item.Id)
 				for _, projectField := range projectItem.FieldValues.Nodes {
 					input := updateProjectV2ItemFieldValueInput(projectItem.Project.Id, addMutation.AddProjectV2ItemById.Item.Id, projectField)
 					if input == nil {
@@ -99,12 +99,18 @@ func main() {
 					}
 				}
 			}
-			fmt.Printf("Issue cloned successfully: %s\n", createMutation.CreateIssue.Issue.Url)
+			fmt.Println("----------------------------------------------------------------------------")
+			fmt.Println("✓ Issue cloned successfully")
+			fmt.Printf("ID:    #%d\n", createMutation.CreateIssue.Issue.Number)
+			fmt.Printf("Title: %s\n", createMutation.CreateIssue.Issue.Title)
+			fmt.Printf("URL:   %s\n", createMutation.CreateIssue.Issue.Url)
+			fmt.Println("----------------------------------------------------------------------------")
 			return nil
 		},
 	}
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
+		fmt.Printf("✗ Error:%s\n", err)
+		os.Exit(1)
 	}
 }
 

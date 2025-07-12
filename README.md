@@ -2,8 +2,8 @@
 
 ## Overview
 
-`gh-issue-clone` is a gh extension written in Go that allows users to clone (duplicate) GitHub issues from a given issue URL. 
-The tool fetches the details of a specified issue, optionally applies a different issue template, and creates a new issue in the target repository. 
+`gh-issue-clone` is a gh extension that allows users to clone (duplicate) GitHub issues from a given issue URL.  
+The tool fetches the details of a specified issue, optionally applies a different issue template, and creates a new issue in the target repository.  
 It can also add the new issue to project boards and copy over relevant field values.
 
 ## Features

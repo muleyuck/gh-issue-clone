@@ -32,7 +32,8 @@ type FieldValue struct {
 
 type ProjectItem struct {
 	Project struct {
-		Id graphql.ID
+		Id    graphql.ID
+		Title graphql.String
 	}
 	FieldValues struct {
 		Nodes []FieldValue
@@ -122,8 +123,10 @@ type CreateIssueInput struct {
 type CreateIssueMutation struct {
 	CreateIssue struct {
 		Issue struct {
-			Id  graphql.ID
-			Url graphql.String
+			Id     graphql.ID
+			Number graphql.Int
+			Title  graphql.String
+			Url    graphql.String
 		}
 	} `graphql:"createIssue(input: $input)"`
 }
