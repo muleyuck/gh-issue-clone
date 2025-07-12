@@ -60,6 +60,14 @@ func createIssueInput(query GetIssueQuery, template *IssueTemplate) map[string]a
 	}
 }
 
+func deleteIssueInput(issueId graphql.ID) map[string]any {
+	return map[string]any{
+		"input": DeleteIssueInput{
+			IssueId: issueId,
+		},
+	}
+}
+
 func addProjectV2ItemByIdInput(projectId graphql.ID, issueId graphql.ID) map[string]any {
 	return map[string]any{
 		"input": AddProjectV2ItemByIdInput{

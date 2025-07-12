@@ -131,6 +131,16 @@ type CreateIssueMutation struct {
 	} `graphql:"createIssue(input: $input)"`
 }
 
+type DeleteIssueInput struct {
+	IssueId graphql.ID `json:"issueId"`
+}
+
+type DeleteIssueMutation struct {
+	DeleteIssue struct {
+		ClientMutationId graphql.String
+	} `graphql:"deleteIssue(input: $input)"`
+}
+
 type AddProjectV2ItemByIdInput struct {
 	ProjectId graphql.ID `json:"projectId"`
 	ContentId graphql.ID `json:"contentId"`

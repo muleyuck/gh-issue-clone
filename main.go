@@ -78,13 +78,19 @@ func main() {
 
 			var addMutation AddProjectV2ItemByIdMutation
 			var updateMutation UpdateProjectV2ItemFieldValueMutation
+			var deleteMutation DeleteIssueMutation
 
 			projectItems := query.Repository.Issue.ProjectItems.Nodes
 			for _, projectItem := range projectItems {
 				fmt.Printf("Found relevant project: %s. Add the issue to the project.\n", projectItem.Project.Title)
-				err = client.Mutate("AddProjectV2ItemById", &addMutation, addProjectV2ItemByIdInput(projectItem.Project.Id, createMutation.CreateIssue.Issue.Id))
+				issueId := createMutation.CreateIssue.Issue.Id
+				err = client.Mutate("AddProjectV2ItemById", &addMutation, addProjectV2ItemByIdInput(projectItem.Project.Id, issueId))
 				if err != nil {
-					// TODO: Remove Issue to Rollback
+					fmt.Println("✗ An error occurred while adding to project. delete the issue.")
+					err = client.Mutate("DeleteIssue", &deleteMutation, deleteIssueInput(issueId))
+					if err != nil {
+						return err
+					}
 					return err
 				}
 
