@@ -1,4 +1,4 @@
-package main
+package types
 
 import graphql "github.com/cli/shurcooL-graphql"
 
@@ -56,62 +56,53 @@ type IssueTemplate struct {
 	} `graphql:"labels(first: 10)"`
 }
 
-func FindByName(templates []IssueTemplate, name string) *IssueTemplate {
-	m := map[graphql.String]IssueTemplate{}
-	for _, template := range templates {
-		m[template.Name] = template
+type IssueQuery struct {
+	Title     graphql.String
+	Body      graphql.String
+	IssueType struct {
+		Id graphql.ID
 	}
-	val, ok := m[graphql.String(name)]
-	if !ok {
-		return nil
+	Assinees struct {
+		Nodes []struct {
+			Id graphql.ID
+		}
+	} `graphql:"assignees(first: 10)"`
+	Labels struct {
+		Nodes []struct {
+			Id graphql.ID
+		}
+	} `graphql:"labels(first: 10)"`
+	Parent struct {
+		Id graphql.ID
 	}
-	return &val
+	ProjectItems struct {
+		Nodes []ProjectItem
+	} `graphql:"projectItems(first: 10,  includeArchived: false)"`
+	Milestone struct {
+		Id graphql.ID
+	}
+	SubIssues struct {
+		Nodes []struct {
+			Id graphql.ID
+		}
+	} `graphql:"subIssues(first: 10)"`
+}
+
+type RepositoryQuery struct {
+	Id             graphql.ID
+	Issue          IssueQuery `graphql:"issue(number: $issueNumber)"`
+	IssueTemplates []IssueTemplate
 }
 
 type GetIssueQuery struct {
-	Repository struct {
-		Id    graphql.ID
-		Issue struct {
-			Title     graphql.String
-			Body      graphql.String
-			IssueType struct {
-				Id graphql.ID
-			}
-			Assinees struct {
-				Nodes []struct {
-					Id graphql.ID
-				}
-			} `graphql:"assignees(first: 10)"`
-			Labels struct {
-				Nodes []struct {
-					Id graphql.ID
-				}
-			} `graphql:"labels(first: 10)"`
-			Parent struct {
-				Id graphql.ID
-			}
-			ProjectItems struct {
-				Nodes []ProjectItem
-			} `graphql:"projectItems(first: 10,  includeArchived: false)"`
-			Milestone struct {
-				Id graphql.ID
-			}
-			SubIssues struct {
-				Nodes []struct {
-					Id graphql.ID
-				}
-			} `graphql:"subIssues(first: 10)"`
-		} `graphql:"issue(number: $issueNumber)"`
-		IssueTemplates []IssueTemplate
-	} `graphql:"repository(owner: $owner, name: $repo)"`
+	Repository RepositoryQuery `graphql:"repository(owner: $owner, name: $repo)"`
 }
 
 type GetIssueTemplateQuery struct{}
 
 type CreateIssueInput struct {
 	AssigneeIds   []graphql.ID   `json:"assigneeIds"`
-	Body          any            `json:"body"`
-	IssueTemplate any            `json:"issueTemplate"`
+	Body          graphql.String `json:"body"`
 	IssueTypeId   graphql.ID     `json:"issueTypeId"`
 	LabelIds      []graphql.ID   `json:"labelIds"`
 	MilestoneId   graphql.ID     `json:"milestoneId"`

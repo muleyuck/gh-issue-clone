@@ -1,17 +1,33 @@
-package main
+package variables
 
 import (
 	"slices"
 
 	graphql "github.com/cli/shurcooL-graphql"
+	"github.com/muleyuck/gh-issue-clone/internal/types"
 )
 
-func getIssueInput(owner string, repo string, issueNumber int) map[string]any {
+func GetIssueInput(owner string, repo string, issueNumber int) map[string]any {
 	return map[string]any{
 		"owner":       graphql.String(owner),
 		"repo":        graphql.String(repo),
 		"issueNumber": graphql.Int(issueNumber),
 	}
+}
+
+func FindTemplateByName(templates []types.IssueTemplate, name string) *types.IssueTemplate {
+	if len(name) > 0 {
+		return nil
+	}
+	m := map[graphql.String]types.IssueTemplate{}
+	for _, template := range templates {
+		m[template.Name] = template
+	}
+	val, ok := m[graphql.String(name)]
+	if !ok {
+		return nil
+	}
+	return &val
 }
 
 func generateIdSlice(targets []struct{ Id graphql.ID }) []graphql.ID {
@@ -26,58 +42,70 @@ func generateIdSlice(targets []struct{ Id graphql.ID }) []graphql.ID {
 	})
 }
 
-func createIssueInput(query GetIssueQuery, template *IssueTemplate) map[string]any {
-	var assigneeIds []graphql.ID
-	var body graphql.String
-	var labelIds []graphql.ID
-	var title graphql.String
-	if template != nil {
-		assigneeIds = generateIdSlice(template.Assinees.Nodes)
-		body = template.Body
-		labelIds = generateIdSlice(template.Labels.Nodes)
-		if len(template.Title) > 0 {
-			title = template.Title
-		} else {
-			title = query.Repository.Issue.Title
+type templateInput struct {
+	assigneeIds []graphql.ID
+	body        graphql.String
+	labelIds    []graphql.ID
+	title       graphql.String
+}
+
+func getTemplateInput(template *types.IssueTemplate) *templateInput {
+	if template == nil {
+		return nil
+	}
+	return &templateInput{
+		assigneeIds: generateIdSlice(template.Assinees.Nodes),
+		body:        template.Body,
+		labelIds:    generateIdSlice(template.Labels.Nodes),
+		title:       template.Title,
+	}
+}
+
+func CreateIssueInput(query types.GetIssueQuery, template *types.IssueTemplate) map[string]any {
+	t := getTemplateInput(template)
+	if t == nil {
+		t = &templateInput{
+			assigneeIds: generateIdSlice(query.Repository.Issue.Assinees.Nodes),
+			body:        query.Repository.Issue.Body,
+			labelIds:    generateIdSlice(query.Repository.Issue.Labels.Nodes),
+			title:       query.Repository.Issue.Title,
 		}
-	} else {
-		assigneeIds = generateIdSlice(query.Repository.Issue.Assinees.Nodes)
-		body = query.Repository.Issue.Body
-		labelIds = generateIdSlice(query.Repository.Issue.Labels.Nodes)
-		title = query.Repository.Issue.Title
+	}
+	if len(t.title) == 0 {
+		t.title = query.Repository.Issue.Title
 	}
 	return map[string]any{
-		"input": CreateIssueInput{
-			AssigneeIds:   assigneeIds,
-			Body:          body,
+		"input": types.CreateIssueInput{
+			AssigneeIds:   t.assigneeIds,
+			Body:          t.body,
 			IssueTypeId:   query.Repository.Issue.IssueType.Id,
-			LabelIds:      labelIds,
+			LabelIds:      t.labelIds,
 			MilestoneId:   query.Repository.Issue.Milestone.Id,
 			ParentIssueId: query.Repository.Issue.Parent.Id,
 			RepositoryId:  query.Repository.Id,
-			Title:         title,
+			Title:         t.title,
 		},
 	}
 }
 
-func deleteIssueInput(issueId graphql.ID) map[string]any {
+func DeleteIssueInput(issueId graphql.ID) map[string]any {
 	return map[string]any{
-		"input": DeleteIssueInput{
+		"input": types.DeleteIssueInput{
 			IssueId: issueId,
 		},
 	}
 }
 
-func addProjectV2ItemByIdInput(projectId graphql.ID, issueId graphql.ID) map[string]any {
+func AddProjectV2ItemByIdInput(projectId graphql.ID, issueId graphql.ID) map[string]any {
 	return map[string]any{
-		"input": AddProjectV2ItemByIdInput{
+		"input": types.AddProjectV2ItemByIdInput{
 			ProjectId: projectId,
 			ContentId: issueId,
 		},
 	}
 }
 
-func structureFieldValue(fieldValue FieldValue) any {
+func structureFieldValue(fieldValue types.FieldValue) any {
 	switch fieldValue.Typename {
 	case "ProjectV2ItemFieldDateValue":
 		return struct {
@@ -105,7 +133,7 @@ func structureFieldValue(fieldValue FieldValue) any {
 	return nil
 }
 
-func updateProjectV2ItemFieldValueInput(projectId graphql.ID, itemId graphql.ID, projectField FieldValue) map[string]any {
+func UpdateProjectV2ItemFieldValueInput(projectId graphql.ID, itemId graphql.ID, projectField types.FieldValue) map[string]any {
 	fieldId := projectField.ProjectV2ItemFieldValueCommon.Field.ProjectV2FieldCommon.Id
 	if fieldId == nil {
 		return nil
@@ -115,7 +143,7 @@ func updateProjectV2ItemFieldValueInput(projectId graphql.ID, itemId graphql.ID,
 		return nil
 	}
 	return map[string]any{
-		"input": UpdateProjectV2ItemFieldValueInput{
+		"input": types.UpdateProjectV2ItemFieldValueInput{
 			ProjectId: projectId,
 			ItemId:    itemId,
 			FieldId:   fieldId,
