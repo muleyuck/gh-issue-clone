@@ -16,7 +16,7 @@ func GetIssueInput(owner string, repo string, issueNumber int) map[string]any {
 }
 
 func FindTemplateByName(templates []types.IssueTemplate, name string) *types.IssueTemplate {
-	if len(name) > 0 {
+	if len(name) == 0 {
 		return nil
 	}
 	m := map[graphql.String]types.IssueTemplate{}

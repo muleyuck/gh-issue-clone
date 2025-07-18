@@ -152,3 +152,65 @@ func TestCreateIssueInput(t *testing.T) {
 		})
 	}
 }
+
+func TestFindTemplateByName(t *testing.T) {
+	templates := []types.IssueTemplate{
+		{
+			Name:  "bug_report",
+			Title: "Bug Report",
+			Body:  "Bug report template body",
+		},
+		{
+			Name:  "feature_request",
+			Title: "Feature Request",
+			Body:  "Feature request template body",
+		},
+	}
+
+	tests := []struct {
+		name         string
+		templates    []types.IssueTemplate
+		templateName string
+		expected     *types.IssueTemplate
+	}{
+		{
+			name:         "Empty template name",
+			templates:    templates,
+			templateName: "",
+			expected:     nil,
+		},
+		{
+			name:         "Existing template name",
+			templates:    templates,
+			templateName: "bug_report",
+			expected:     &templates[0],
+		},
+		{
+			name:         "Non-existing template name",
+			templates:    templates,
+			templateName: "non_existing",
+			expected:     nil,
+		},
+		{
+			name:         "Empty templates list",
+			templates:    []types.IssueTemplate{},
+			templateName: "bug_report",
+			expected:     nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FindTemplateByName(tt.templates, tt.templateName)
+			if (got == nil) != (tt.expected == nil) {
+				t.Errorf("FindTemplateByName() = %v, want %v", got, tt.expected)
+				return
+			}
+			if got != nil && tt.expected != nil {
+				if got.Name != tt.expected.Name || got.Title != tt.expected.Title || got.Body != tt.expected.Body {
+					t.Errorf("FindTemplateByName() = %v, want %v", got, tt.expected)
+				}
+			}
+		})
+	}
+}
