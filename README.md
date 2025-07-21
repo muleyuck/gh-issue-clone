@@ -3,6 +3,7 @@
 [![Release](https://img.shields.io/github/release/muleyuck/gh-issue-clone.svg)](https://github.com/muleyuck/gh-issue-clone/releases/latest)
 
 # 👑 gh-issue-clone
+![demo](https://github.com/user-attachments/assets/959f66f2-c6b0-4493-af37-9d05fc5a2522)
 
 ## Overview
 
