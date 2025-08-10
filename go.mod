@@ -3,7 +3,7 @@ module github.com/muleyuck/gh-issue-clone
 go 1.24.1
 
 require (
-	github.com/cli/go-gh/v2 v2.12.1
+	github.com/cli/go-gh/v2 v2.12.2
 	github.com/cli/shurcooL-graphql v0.0.4
 	github.com/urfave/cli/v3 v3.3.8
 )
