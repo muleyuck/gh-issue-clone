@@ -17,6 +17,7 @@ func main() {
 		Version: versions.AppVersion,
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "template", Aliases: []string{"t"}, Usage: "Issue Template Name"},
+			&cli.BoolFlag{Name: "browse", Aliases: []string{"b"}, Usage: "Open cloned issue in your browser", HideDefault: true},
 		},
 		Arguments: []cli.Argument{
 			&cli.StringArg{Name: "url"},
