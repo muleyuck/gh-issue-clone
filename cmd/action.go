@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/cli/go-gh/v2/pkg/api"
@@ -83,7 +82,7 @@ func CloneIssue(ctx context.Context, c *cli.Command) error {
 			err = client.Mutate("UpdateProjectV2ItemFieldValue", &updateMutation, input)
 			if err != nil {
 				fieldName := projectField.ProjectV2ItemFieldValueCommon.Field.ProjectV2FieldCommon.Name
-				log.Printf("Fail to update project field[%s]: %v\n", fieldName, err)
+				fmt.Printf("Fail to update project field[%s]: %v\n", fieldName, err)
 				continue
 			}
 		}
@@ -94,5 +93,14 @@ func CloneIssue(ctx context.Context, c *cli.Command) error {
 	fmt.Printf("Title: %s\n", createMutation.CreateIssue.Issue.Title)
 	fmt.Printf("URL:   %s\n", createMutation.CreateIssue.Issue.Url)
 	fmt.Println("----------------------------------------------------------------------------")
+
+	if c.Bool("browse") {
+		clonedIssueURL := string(createMutation.CreateIssue.Issue.Url)
+		fmt.Println("") // line break only
+		fmt.Printf("opening %s in your browser.\n", clonedIssueURL)
+		if err := browse(clonedIssueURL); err != nil {
+			return err
+		}
+	}
 	return nil
 }
