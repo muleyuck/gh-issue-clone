@@ -5,7 +5,7 @@ go 1.25.1
 require (
 	github.com/cli/go-gh/v2 v2.12.2
 	github.com/cli/shurcooL-graphql v0.0.4
-	github.com/urfave/cli/v3 v3.4.1
+	github.com/urfave/cli/v3 v3.5.0
 )
 
 require (
