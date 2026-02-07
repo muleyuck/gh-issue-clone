@@ -11,7 +11,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update app_version
         shell: bash
         run: |
@@ -22,7 +22,7 @@ jobs:
           fi
           sed -i -e "s/.*/$pushed_tag/" ./versions/app_version
           git update-index --skip-worktree ./versions/app_version
-      - uses: cli/gh-extension-precompile@v2
+      - uses: cli/gh-extension-precompile@561b19deda1228a0edf856c3325df87416f8c9bd #v2
         with:
           generate_attestations: true
           go_version_file: go.mod
