@@ -1,6 +1,6 @@
 module github.com/muleyuck/gh-issue-clone
 
-go 1.26.1
+go 1.27.1
 
 require (
 	github.com/cli/go-gh/v2 v2.16.1
