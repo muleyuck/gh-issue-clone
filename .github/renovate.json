@@ -1,0 +1,28 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "timezone": "Asia/Tokyo",
+  "schedule": ["on saturday"],
+  "reviewers": ["muleyuck"],
+  "prConcurrentLimit": 10,
+  "semanticCommits": "enabled",
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "dependencyDashboard": true,
+  "postUpdateOptions": ["gomodTidy"],
+  "packageRules": [
+    { "matchManagers": ["github-actions"], "groupName": "github-actions dependencies" },
+    { "matchManagers": ["github-actions"], "matchUpdateTypes": ["patch", "minor", "digest"], "automerge": true },
+
+    { "matchManagers": ["gomod"], "matchUpdateTypes": ["major"], "enabled": false },
+    { "matchManagers": ["gomod"], "matchUpdateTypes": ["minor"], "minimumReleaseAge": "7 days" },
+    { "matchManagers": ["gomod"], "matchUpdateTypes": ["patch"], "minimumReleaseAge": "2 days" },
+
+    { "matchManagers": ["gomod"], "matchDepTypes": ["indirect"], "matchUpdateTypes": ["patch", "minor"], "automerge": true },
+
+    { "matchManagers": ["gomod"], "matchDepNames": ["go"], "matchDepTypes": ["golang"], "rangeStrategy": "bump", "groupName": "go toolchain", "automerge": false },
+    { "matchManagers": ["mise"], "matchDepNames": ["go"], "groupName": "go toolchain", "automerge": false },
+    { "matchManagers": ["mise"], "matchDepNames": ["go"], "matchUpdateTypes": ["major"], "enabled": false },
+
+    { "matchManagers": ["mise"], "matchDepNames": ["golangci-lint"], "groupName": "golangci-lint", "matchUpdateTypes": ["patch", "minor"], "automerge": true }
+  ]
+}
